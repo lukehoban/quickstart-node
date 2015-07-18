@@ -2,22 +2,18 @@ var express = require('express');
 var app = express();
 var redis = require("redis");
 
-var r;
-var options = {
-	max_attempts : 1
-};
 var redisConnected = false;
+var host = null;
+var port = null;
+var auth_pass;
 
 if( process.env.REDIS_PORT && process.env.REDIS_ENV_REDIS_PASS ){
-	options.auth_pass = process.env.REDIS_ENV_REDIS_PASS;
-
-	var port = process.env.REDIS_PORT_6379_TCP_PORT;
-	var host = process.env.REDIS_PORT_6379_TCP_ADDR;
-
-	r = redis.createClient(port, host, options);
-}else{
-	r = redis.createClient(null, null, options);
+	port = process.env.REDIS_PORT_6379_TCP_PORT;
+	host = process.env.REDIS_PORT_6379_TCP_ADDR;
+	auth_pass = process.env.REDIS_ENV_REDIS_PASS;
 }
+
+var r = redis.createClient(host, port, { max_attempts : 1, auth_pass: auth_pass });
 
 r.on('error', function(err){
 	console.log('Error on redis', err);
